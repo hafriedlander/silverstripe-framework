@@ -114,6 +114,23 @@ class ErrorControlChainTest extends SapphireTest {
 			->executeInSubprocess();
 
 		$this->assertEquals('Done', $out);
+
+		// Memory exhaustion
+
+		$chain = new ErrorControlChainTest_Chain();
+
+		list($out, $code) = $chain
+			->then(function(){
+				ini_set('memory_limit', '10M');
+				$a = array();
+				while(1) $a[] = 1;
+			})
+			->thenIfErrored(function(){
+				echo "Done";
+			})
+			->executeInSubprocess();
+
+		$this->assertEquals('Done', $out);
 	}
 
 	function testExceptionSuppression() {

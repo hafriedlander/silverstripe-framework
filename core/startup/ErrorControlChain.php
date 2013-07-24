@@ -74,9 +74,22 @@ class ErrorControlChain {
 		return $error && ($error['type'] & self::$fatal_errors) != 0;
 	}
 
+	protected function translateMemstring($memString) {
+		switch(strtolower(substr($memString, -1))) {
+			case "k": return round(substr($memString, 0, -1)*1024);
+			case "m": return round(substr($memString, 0, -1)*1024*1024);
+			case "g": return round(substr($memString, 0, -1)*1024*1024*1024);
+			default: return round($memString);
+		}
+	}
+
 	public function handleFatalError() {
 		if ($this->handleFatalErrors && $this->suppression) {
 			if ($this->lastErrorWasFatal()) {
+				// First, bump up memory limit by 10MB since we might've run out
+				$cur = $this->translateMemstring(ini_get('memory_limit'));
+				if ($cur != -1) ini_set('memory_limit', $cur + 10000000);
+
 				$this->error = true;
 				$this->step();
 			}

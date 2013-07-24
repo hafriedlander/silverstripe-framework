@@ -94,7 +94,8 @@ class ParameterConfirmationToken {
 		$location = "$proto://" . $host . BASE_URL . $url . ($params ? '?'.http_build_query($params) : '');
 
 		// And redirect
-		header('location: '.$location, true, 302);
+		if (headers_sent()) echo "<a href='$location'>Click here to flush</a>";
+		else header('location: '.$location, true, 302);
 		die;
 	}
 }
